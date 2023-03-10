@@ -1,7 +1,8 @@
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
 import * as AWS  from 'aws-sdk'
-import * as uuid from 'uuid'
+import * as uuid from 'uuid';
+import {getUserId} from '../../auth/utils';
 
 const docClient = new AWS.DynamoDB.DocumentClient()
 const groupsTable = process.env.GROUPS_TABLE
@@ -11,9 +12,13 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const itemId = uuid.v4()
     console.log('new id: ', itemId);
     const parsedBody = JSON.parse(event.body);
-
+    const authorization = event.headers.Authorization;
+    const split = authorization.split(' ');
+    const jwtToken = split[1];
+    var userId = getUserId(jwtToken);
     const newItem = {
         id: itemId,
+        userId: userId,
         ...parsedBody
     };
     console.log('table: ', groupsTable);
