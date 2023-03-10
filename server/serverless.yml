@@ -85,6 +85,8 @@ custom:
 functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
+  RS256Auth:
+    handler: src/lambda/auth/rs256Auth0Authorizer.handler
 
   GetGroups:
     handler: src/lambda/http/getGroups.handler
@@ -100,7 +102,7 @@ functions:
           method: post
           path: groups
           cors: true
-          authorizer: Auth
+          authorizer: RS256Auth
   GetImages:
     handler: src/lambda/http/getImages.handler
     events:
@@ -115,12 +117,12 @@ functions:
           method: get
           path: images/{imageId}
           cors: true
-          authorizer: Auth
   CreateImage:
     handler: src/lambda/http/createImage.handler
     events:
       - http:
           method: post
+          authorizer: RS256Auth
           path: groups/{groupId}/images
           cors: true        
           documentation:
@@ -243,6 +245,15 @@ resources:
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.CONNECTIONS_TABLE}    
     
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-body-validator'
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
+
     AttachmentsBucket:
       Type: AWS::S3::Bucket
       DependsOn: SNSTopicPolicy

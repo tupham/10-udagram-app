@@ -8,7 +8,7 @@ export async function getImages(groupId: string): Promise<ImageModel[]> {
   const response = await fetch(`${apiEndpoint}/groups/${groupId}/images`)
   const result = await response.json()
 
-  return result;
+  return result.items;
 }
 
 export async function createImage(
